@@ -9,7 +9,7 @@ import (
 	"github.com/sony/gobreaker"
 )
 
-var cb *gobreaker.CircuitBreaker
+var cb *gobreaker.CircuitBreaker[[]byte]
 
 func init() {
 	var st gobreaker.Settings
@@ -19,12 +19,12 @@ func init() {
 		return counts.Requests >= 3 && failureRatio >= 0.6
 	}
 
-	cb = gobreaker.NewCircuitBreaker(st)
+	cb = gobreaker.NewCircuitBreaker[[]byte](st)
 }
 
 // Get wraps http.Get in CircuitBreaker.
 func Get(url string) ([]byte, error) {
-	body, err := cb.Execute(func() (interface{}, error) {
+	return cb.Execute(func() ([]byte, error) {
 		resp, err := http.Get(url)
 		if err != nil {
 			return nil, err
@@ -38,11 +38,6 @@ func Get(url string) ([]byte, error) {
 
 		return body, nil
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	return body.([]byte), nil
 }
 
 func main() {
