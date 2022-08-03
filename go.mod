@@ -1,4 +1,4 @@
-module github.com/sony/gobreaker
+module github.com/Zariel/gobreaker
 
 go 1.18
 
